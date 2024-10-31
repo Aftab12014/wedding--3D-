@@ -4,9 +4,10 @@ var autoRotate = true; // auto rotate or not
 var rotateSpeed = -60; // unit: seconds/360 degrees
 var imgWidth = 120; // width of images (unit: px)
 var imgHeight = 170; // height of images (unit: px)
+var bgMusicURL='background.mp3';
 
 // Link of background music - set 'null' if you dont want to play background music
-var bgMusicURL = 'audio.mp3';
+var bgMusicURL = 'background.mp3';
 var bgMusicControls = true; // Show UI music control
 
 
@@ -116,3 +117,39 @@ document.onmousewheel = function(e) {
   radius += d;
   init(1);
 };
+
+// Detect pinch gesture and zoom in/out
+let initialDistance = null;
+let scale = 1;
+
+function handleTouchMove(event) {
+    if (event.touches.length == 2) {
+        let touch1 = event.touches[0];
+        let touch2 = event.touches[1];
+
+        let currentDistance = Math.sqrt(
+            (touch1.pageX - touch2.pageX) ** 2 +
+            (touch1.pageY - touch2.pageY) ** 2
+        );
+
+        if (initialDistance == null) {
+            initialDistance = currentDistance;
+        } else {
+            let difference = currentDistance - initialDistance;
+            scale += difference * 0.001; // Adjust scaling factor as needed
+            scale = Math.max(0.5, Math.min(2, scale)); // Clamp scale value
+
+            let dragContainer = document.getElementById('drag-container');
+            dragContainer.style.transform = `scale(${scale})`;
+
+            initialDistance = currentDistance;
+        }
+    }
+}
+
+function handleTouchEnd(event) {
+    initialDistance = null;
+}
+
+document.addEventListener('touchmove', handleTouchMove);
+document.addEventListener('touchend', handleTouchEnd);
